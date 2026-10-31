@@ -1,4 +1,5 @@
-from sqlalchemy import String
+from datetime import datetime
+from sqlalchemy import String, func
 from sqlalchemy.orm import mapped_column, Mapped
 
 from app.db.base import Base
@@ -13,5 +14,7 @@ class User(Base):
         unique=True, 
         index=True
     )
+    password_hash: Mapped[str] = mapped_column(String(255))
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
 

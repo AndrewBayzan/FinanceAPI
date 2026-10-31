@@ -8,8 +8,15 @@ engine = create_engine(
     settings.db_url
 )
 
-Session = sessionmaker(
+SessionLocal = sessionmaker(
     bind = engine,
     expire_on_commit=False
 )
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close
 
