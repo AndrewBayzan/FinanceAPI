@@ -1,6 +1,6 @@
 from datetime import date, datetime
 from decimal import Decimal
-from sqlalchemy import String, Numeric, ForeignKey, CheckConstraint, Enum, func, text
+from sqlalchemy import String, Numeric, DateTime, Date, ForeignKey, CheckConstraint, Enum, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
@@ -21,8 +21,8 @@ class Transaction(Base):
         )
     amount: Mapped[Decimal] = mapped_column(Numeric(10,2), nullable=False)
     description: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    transaction_date: Mapped[date] = mapped_column(server_default=func.now(), nullable=False)
-    created_at: Mapped[datetime] = mapped_column(server_default=func.current_date(), nullable=False)
+    transaction_date: Mapped[date] = mapped_column(Date, server_default=func.current_date(), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     __table_args__ = (
         CheckConstraint("amount > 0.00", name="chk_amount"),
