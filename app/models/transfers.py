@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from decimal import Decimal
 
-from sqlalchemy import Numeric, Date, DateTime, ForeignKey, CheckConstraint, Enum, func
+from sqlalchemy import Numeric, Date, DateTime, ForeignKey, ForeignKeyConstraint, CheckConstraint, Enum, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
@@ -13,8 +13,8 @@ class Transfer(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
-    source_account_id: Mapped[int] = mapped_column(ForeignKey("accounts.id"), nullable=False)
-    destination_account_id: Mapped[int] = mapped_column(ForeignKey("accounts.id"), nullable=False)
+    source_account_id: Mapped[int] = mapped_column(nullable=False)
+    destination_account_id: Mapped[int] = mapped_column(nullable=False)
     transfer_amount: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
     commission: Mapped[Decimal] = mapped_column(Numeric(10,2), nullable=False, default=Decimal("0.00"))
     commission_source: Mapped[CommissionSource | None] = mapped_column(Enum(CommissionSource, values_callable=lambda enum_cls: [ member.value for member in enum_cls]), nullable=True)
@@ -29,4 +29,14 @@ class Transfer(Base):
                         "(commission > 0 AND commission_source IS NOT NULL)",
                         name="chk_commission_source"
                         ),
+        ForeignKeyConstraint(
+            ["user_id", "source_account_id"],
+            ["accounts.user_id", "accounts.id"],
+            name="fk_source_account_id"
+        ),
+        ForeignKeyConstraint(
+            ["user_id", "destination_account_id"],
+            ["accounts.user_id", "accounts.id"],
+            name="fk_destination_account_id"
+        )
     )

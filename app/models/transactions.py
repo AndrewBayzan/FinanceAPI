@@ -1,6 +1,6 @@
 from datetime import date, datetime
 from decimal import Decimal
-from sqlalchemy import String, Numeric, DateTime, Date, ForeignKey, CheckConstraint, Enum, func
+from sqlalchemy import String, Numeric, DateTime, Date, ForeignKey, ForeignKeyConstraint, CheckConstraint, Enum, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
@@ -11,7 +11,7 @@ class Transaction(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
-    account_id: Mapped[int] = mapped_column(ForeignKey("accounts.id"), nullable=False)
+    account_id: Mapped[int] = mapped_column(nullable=False)
     category_id: Mapped[int] = mapped_column(ForeignKey("categories.id"), nullable=False)
     type: Mapped[TransactionType] = mapped_column(Enum(
         TransactionType,
@@ -26,4 +26,9 @@ class Transaction(Base):
 
     __table_args__ = (
         CheckConstraint("amount > 0.00", name="chk_amount"),
+        ForeignKeyConstraint(
+            ["user_id", "account_id"],
+            ["accounts.user_id", "accounts.id"],
+            name="fk_transaction_account"
+            )
     )

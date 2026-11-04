@@ -17,5 +17,6 @@ class Account(Base):
 
     __table_args__ = (
         UniqueConstraint("user_id", "name", name="uq_user_account"),
+        UniqueConstraint("user_id", "id", name="uq_account_user_id"),
         CheckConstraint("initial_balance >= 0", name="chk_init_balance" ),
     )
