@@ -5,6 +5,7 @@ from sqlalchemy.exc import IntegrityError
 from app.models.users import User
 from app.core.security import hash_password
 from app.schemas.user import UserCreate
+from app.exceptions.user import UsernameAlreadyExistsError, EmailAlreadyExistsError
 
 
 def create_user(
@@ -15,13 +16,13 @@ def create_user(
         select(User).where(User.username == user_data.username)
     )
     if existing_user:
-        raise ValueError("Username already registered")
+        raise UsernameAlreadyExistsError("Username already registered")
 
     existing_email = db.scalar(
         select(User).where(User.email == user_data.email)
     )
     if existing_email:
-        raise ValueError("Email already registered")
+        raise EmailAlreadyExistsError("Email already registered")
 
     hashed_password = hash_password(user_data.password.get_secret_value())
 
@@ -34,8 +35,16 @@ def create_user(
         db.add(user)
         db.commit()
         db.refresh(user)
-    except IntegrityError:
+    except IntegrityError as error:
         db.rollback()
-        raise
 
+        constraint_name = error.orig.diag.constraint_name
+
+        if constraint_name == "uq_users_username":
+            raise UsernameAlreadyExistsError() from error
+
+        if constraint_name == "uq_users_email":
+            raise EmailAlreadyExistsError() from error
+
+        raise
     return user
