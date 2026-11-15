@@ -4,5 +4,8 @@ from app.models.accounts import Account
 from app.models.categories import Category
 from app.models.transactions import Transaction
 from app.models.transfers import Transfer
+from app.models.refresh_token import RefreshToken
 
-__all__ = ["User", "Account", "Category", "Transaction", "Transfer", "Base"]
+
+print(Base.metadata.tables.keys())
+__all__ = ["User", "Account", "Category", "Transaction", "Transfer", "RefreshToken", "Base"]
