@@ -10,4 +10,4 @@ token = create_access_token(1)
 payload = decode_access_token(token)
 
 print(token)
-print(payload)
+print

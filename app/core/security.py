@@ -1,5 +1,6 @@
 from datetime import timedelta, datetime, timezone
 from pwdlib import PasswordHash
+import hashlib
 import jwt
 import secrets
 
@@ -37,5 +38,14 @@ def decode_access_token(token: str) -> dict:
 
     return payload
 
-def create_refresh_token(user_id: int) -> str:
+def create_refresh_token(user_id: int) -> dict:
     refresh_token = secrets.token_urlsafe(64)
+    token_hash = hashlib.sha256(refresh_token.encode()).hexdigest()
+    expires_at = datetime.now(timezone.utc) + timedelta(days=settings.refresh_token_expire_days)
+
+    return {
+        "refresh_token": refresh_token,
+        "token_hash": token_hash,
+        "expires_at": expires_at
+            }
+
