@@ -3,7 +3,8 @@ from sqlalchemy.exc import SQLAlchemyError
 import jwt
 
 from app.models.refresh_token import RefreshToken
-from app.core.security import create_refresh_token, decode_access_token
+from app.core.security import create_access_token, create_refresh_token
+from app.models.users import User
 
 def save_refresh_token(db: Session, user_id: int) -> str:
     token = create_refresh_token(user_id)
@@ -22,4 +23,12 @@ def save_refresh_token(db: Session, user_id: int) -> str:
 
     return token["refresh_token"]
 
-    
+def issue_tokens(db: Session, user: User) -> dict:
+    access_token = create_access_token(user.id)
+    refresh_token = save_refresh_token(db, user.id)
+
+    return {
+        "access_token" : access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer"
+    }

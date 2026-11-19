@@ -72,4 +72,5 @@ def test_register_conflict_email(client):
         }
     )
     assert response1.status_code == 201
+    
     assert response2.status_code == 409

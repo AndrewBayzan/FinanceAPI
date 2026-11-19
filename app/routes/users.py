@@ -1,16 +1,19 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.orm import Session
 
-from app.dependency.database import get_db
-from app.schemas.user import UserResponse, UserCreate
+from app.dependencies.database import get_db
+from app.schemas.user import UserResponse, UserCreate, AuthResponse
 from app.services.register_service import create_user
 from app.exceptions.user import UsernameAlreadyExistsError, EmailAlreadyExistsError
+from app.dependencies.auth import get_current_user
+from app.models.users import User
+from app.services.auth import issue_tokens
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
 @router.post(
             "/register",
-             response_model=UserResponse,
+             response_model=AuthResponse,
              status_code=status.HTTP_201_CREATED
              )
 def register(
@@ -19,6 +22,7 @@ def register(
 ):
     try:
         user = create_user(db=db, user_data=user_data)
+        tokens = issue_tokens(db, user)
     except UsernameAlreadyExistsError:
         raise HTTPException(
             status_code=409,
@@ -31,4 +35,10 @@ def register(
             detail="Email already registered"
         )
 
-    return user
+    return {"user": user,
+             **tokens
+            }
+
+@router.get("/me", response_model=UserResponse)
+def get_me(current_user: User = Depends(get_current_user)):
+    return current_user

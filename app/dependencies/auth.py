@@ -1,14 +1,18 @@
-from fastapi import Depends, HTTPException, Cookie, status
+from fastapi import Depends, HTTPException
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 import jwt
 
-from app.dependenсies.database import get_db
+from app.dependencies.database import get_db
 from app.core.security import decode_access_token
 from app.models.users import User
 
-def get_current_user(token: str, db: Session = Depends(get_db)) -> User:
+bearer_scheme = HTTPBearer()
+
+def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme), db: Session = Depends(get_db)) -> User:
     try:
+        token = credentials.credentials
         decoded_token = decode_access_token(token)
         user_id = int(decoded_token["sub"])
     except jwt.InvalidTokenError:
