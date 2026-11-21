@@ -1,10 +1,14 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy import select
 import jwt
 
 from app.models.refresh_token import RefreshToken
-from app.core.security import create_access_token, create_refresh_token
+from app.core.security import create_access_token, create_refresh_token, verify_password
 from app.models.users import User
+from app.schemas.user import UserLogin
+from app.exceptions.user import InvalidEmailOrPassword
+
 
 def save_refresh_token(db: Session, user_id: int) -> str:
     token = create_refresh_token(user_id)
@@ -32,3 +36,15 @@ def issue_tokens(db: Session, user: User) -> dict:
         "refresh_token": refresh_token,
         "token_type": "bearer"
     }
+
+def auth_user(db: Session, email:  str, password: str) -> User:
+    user = db.scalars(select(User).where(User.email == email)).first()
+
+    if not user:
+        raise InvalidEmailOrPassword
+
+    checked_password = verify_password(password, user.password_hash)
+    if not checked_password:
+        raise InvalidEmailOrPassword
+
+    return user

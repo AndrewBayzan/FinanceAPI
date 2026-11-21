@@ -3,3 +3,6 @@ class UsernameAlreadyExistsError(Exception):
 
 class EmailAlreadyExistsError(Exception):
     pass
+
+class InvalidEmailOrPassword(Exception):
+    pass
