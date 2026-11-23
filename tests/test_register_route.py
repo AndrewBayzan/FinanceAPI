@@ -15,8 +15,8 @@ def test_register_user(client):
 
     data = response.json()
 
-    assert data["username"] == "testuser"
-    assert data["email"] == "test@mail.com"
+    assert data["user"]["username"] == "testuser"
+    assert data["user"]["email"] == "test@mail.com"
 
     assert "password" not in data
     assert "password_hash" not in data

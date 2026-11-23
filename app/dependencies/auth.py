@@ -15,7 +15,7 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(bearer_
         token = credentials.credentials
         decoded_token = decode_access_token(token)
         user_id = int(decoded_token["sub"])
-    except jwt.InvalidTokenError:
+    except (jwt.InvalidTokenError, KeyError):
         raise HTTPException(status_code=401)
     
     user = db.scalar(select(User).where(User.id == user_id))
