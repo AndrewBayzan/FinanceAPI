@@ -51,7 +51,7 @@ def auth_user(db: Session, email:  str, password: str) -> User:
 
     return user
 
-def refresh(db: Session, data: RefreshRequest) -> dict:
+def refresh_tokens(db: Session, data: RefreshRequest) -> dict:
     hashed_token = hashlib.sha256(data.refresh_token.encode()).hexdigest()
     refresh_token = db.scalar(select(RefreshToken).where(RefreshToken.token_hash == hashed_token))
     
@@ -81,5 +81,4 @@ def refresh(db: Session, data: RefreshRequest) -> dict:
     return {
         "access_token": access_token,
         "refresh_token": new_refresh_token["refresh_token"],
-        "token_type": "bearer"
         }
